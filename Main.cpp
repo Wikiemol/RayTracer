@@ -6,6 +6,8 @@
 
 int main() {
     const unsigned numberOfShapes = 10;
+    Vector a(1, 2, 3);
+    Vector b(4, 5, 6);
 
     unsigned width = 500;
     unsigned height = 500;
@@ -68,6 +70,15 @@ int main() {
     planeMaterial.green = 255;
     planeMaterial.blue = 255;
 
+    Shape::Material triangleMaterial;
+    triangleMaterial.specularity = 0;
+    triangleMaterial.diffusion = 1;
+    triangleMaterial.shininess = 0;
+    triangleMaterial.reflectivity = 0;
+    triangleMaterial.red = 50;
+    triangleMaterial.green = 200;
+    triangleMaterial.blue = 50;
+
     //- Shapes -//
     Sphere *sphere = new Sphere();
     sphere->position(100, -100, 0);
@@ -94,6 +105,26 @@ int main() {
     plane->normal(0, 1, 0);
     plane->material = planeMaterial;
 
+
+    double pyramidX = -100;
+    double pyramidY = -200;
+    double pyramidZ = 400;
+    Triangle *triangle = new Triangle(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ,
+                                      50 + pyramidX, 0 + pyramidY, 100 + pyramidZ,
+                                      -100 + pyramidX, 0 + pyramidY, 50 + pyramidZ);
+    triangle->material = triangleMaterial;
+
+    Triangle *triangle1 = new Triangle(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ,
+                                       100 + pyramidX, 0 + pyramidY, -100 + pyramidZ,
+                                       50 + pyramidX, 0 + pyramidY, 100 + pyramidZ);
+    triangle1->material = triangleMaterial;
+
+    Triangle *triangle2 = new Triangle(-100 + pyramidX, 0 + pyramidY, 0 + pyramidZ,
+                                      -100 + pyramidX, 0 + pyramidY, 50 + pyramidZ,
+                                      100 + pyramidX, 0 + pyramidY, -100 + pyramidZ
+                                      );
+    triangle2->material = triangleMaterial;
+
     //- Constructing the scene -//
     Scene scene;
     scene.camera = camera;
@@ -102,6 +133,11 @@ int main() {
     scene.addShape(sphere3);
     scene.addShape(sphere2);
     scene.addShape(sphere);
+    /*
+    scene.addShape(triangle);
+    scene.addShape(triangle1);
+    scene.addShape(triangle2);
+    */
     scene.addShape(plane);
 
     ColorBuffer cBuff(width, height);
