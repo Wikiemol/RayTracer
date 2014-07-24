@@ -6,7 +6,6 @@
 
 int main() {
     const unsigned numberOfShapes = 10;
-    Shape shapes[numberOfShapes];
 
     unsigned width = 500;
     unsigned height = 500;
@@ -70,30 +69,30 @@ int main() {
     planeMaterial.blue = 255;
 
     //- Shapes -//
-    Shape sphere(Shape::SPHERE);
-    sphere.position(100, -100, 0);
-    sphere.radius = 100;
-    sphere.material = sphereMaterial;
+    Sphere *sphere = new Sphere();
+    sphere->position(100, -100, 0);
+    sphere->radius = 100;
+    sphere->material = sphereMaterial;
 
-    Shape sphere2(Shape::SPHERE);
-    sphere2.position(300, -100, 150);
-    sphere2.radius = 100;
-    sphere2.material = sphere2Material;
+    Sphere *sphere2 = new Sphere();
+    sphere2->position(300, -100, 150);
+    sphere2->radius = 100;
+    sphere2->material = sphere2Material;
 
-    Shape sphere3(Shape::SPHERE);
-    sphere3.position(-50, -100, 150);
-    sphere3.radius = 100;
-    sphere3.material = sphere3Material;
+    Sphere *sphere3 = new Sphere();
+    sphere3->position(-50, -100, 150);
+    sphere3->radius = 100;
+    sphere3->material = sphere3Material;
 
-    Shape sphere4(Shape::SPHERE);
-    sphere4.position(100, -150, 300);
-    sphere4.radius = 50;
-    sphere4.material = sphere4Material;
+    Sphere *sphere4 = new Sphere();
+    sphere4->position(100, -150, 300);
+    sphere4->radius = 50;
+    sphere4->material = sphere4Material;
 
-    Shape plane(Shape::PLANE);
-    plane.position(0, -200, -100);
-    plane.normal(0, 1, 0);
-    plane.material = planeMaterial;
+    Plane *plane = new Plane();
+    plane->position(0, -200, -100);
+    plane->normal(0, 1, 0);
+    plane->material = planeMaterial;
 
     //- Constructing the scene -//
     Scene scene;
@@ -107,10 +106,10 @@ int main() {
 
     ColorBuffer cBuff(width, height);
 
-    double xBound = width / 2;
-    double yBound = height / 2;
-    for (int x = -xBound; x < xBound; x++) {
-        for (int y = -yBound; y < yBound; y++) {
+    double cameraViewXBound = width / 2;
+    double cameraViewYBound = height / 2;
+    for (int x = -cameraViewXBound; x < cameraViewXBound; x++) {
+        for (int y = -cameraViewYBound; y < cameraViewYBound; y++) {
             //- Anti-Aliasing by averaging -//
             Vector colorVector1 = scene.getColorAt(x, y);
             Vector colorVector2 = scene.getColorAt(x + 0.5, y);

@@ -2,11 +2,13 @@
 #define VECTOR_HPP
 
 #include <math.h>
+#include <time.h>
 
 class Vector {
 public:
     Vector(double a, double b, double c);
     Vector();
+    static Vector rand();
     friend Vector operator*(double b, const Vector &a);
     bool operator==(const Vector &b) const;
     bool operator!=(const Vector &b) const;
@@ -127,6 +129,13 @@ void Vector::throwErrorIfUndefined() const {
     if (undefined) {
         throw std::runtime_error("Vector passed as argument is uninitialized.");
     }
+}
+
+Vector Vector::rand() {
+    Vector randomVector((double) std::rand() / (double) RAND_MAX,
+                        (double) std::rand() / (double) RAND_MAX,
+                        (double) std::rand() / (double) RAND_MAX);
+    return randomVector;
 }
 
 struct Ray {

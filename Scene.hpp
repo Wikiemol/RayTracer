@@ -21,11 +21,11 @@ public:
     PointLight pointLight;
     Scene();
     ~Scene();
-    void addShape(const Shape &shape);
+    void addShape(Shape *shape);
     Vector getColorAt(double x, double y);
     int reflectionDepth;
 private:
-    Shape* shapeBuffer;
+    Shape** shapeBuffer;
     unsigned numberOfShapes;
     unsigned shapeBufferSize;
     void resizeShapeBuffer(unsigned newSize);
@@ -34,21 +34,22 @@ private:
 
 Scene::Scene() {
     shapeBufferSize = 2;
-    shapeBuffer = new Shape[shapeBufferSize];
+    shapeBuffer = new Shape*[shapeBufferSize];
     numberOfShapes = 0;
     reflectionDepth = 3;
 }
 
 Scene::~Scene() {
+    for (unsigned i = 0; i < shapeBufferSize; i++)
+        delete shapeBuffer[i];
+
     delete[] shapeBuffer;
-    shapeBuffer = NULL;
 }
 
-void Scene::addShape(const Shape &shape) {
+void Scene::addShape(Shape *shape) {
     //- if shapeBuffer is full, resize shapeBuffer to twice its size -//
-    if (shapeBufferSize == numberOfShapes) {
+    if (shapeBufferSize == numberOfShapes)
         resizeShapeBuffer(shapeBufferSize * 2);
-    }
 
     shapeBuffer[numberOfShapes] = shape;
     numberOfShapes++;
@@ -59,29 +60,29 @@ Vector Scene::getColorAt(double x, double y) {
     Vector pointOnLensPlane(x, y, -camera.focalLength);
 
     //- cast ray -//
-    Ray ray;
-    ray.position = camera.position;
-    ray.direction = pointOnLensPlane.normalise();
-    return castRay(ray, 0);
+    Ray rayFromCameraToLens;
+    rayFromCameraToLens.position = camera.position;
+    rayFromCameraToLens.direction = pointOnLensPlane.normalise();
+    return castRay(rayFromCameraToLens, 0);
 }
 
 //- returns a vector representing color -//
-Vector Scene::castRay(const Ray &ray, unsigned numberOfTimesRecursed) const{
+Vector Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const {
     //-find closest intersection/closest shape-//
     Shape::Intersection shapeIntersection;
-    Shape closestShape;
+    Shape *closestShape;
     double distanceFromIntersectionToRay;
 
     unsigned closestIndex;
-    for (unsigned i = 0; i < numberOfShapes && shapeBuffer[i].type != Shape::UNDEFINED; i++) {
+    for (unsigned i = 0; i < numberOfShapes && shapeBuffer[i] != NULL; i++) {
 
-        Shape::Intersection currentShapeIntersection = shapeBuffer[i].intersect(ray);
+        Shape::Intersection currentShapeIntersection = shapeBuffer[i]->intersect(mainRay);
 
         if (!currentShapeIntersection.intersection) {
             //- Do nothing if currentShapeIntersection is undefined. The ray intersected nothing -//
         } else {
-            double currentDistanceFromIntersectionToRay = (currentShapeIntersection.intersection - ray.position) 
-                                                        * (currentShapeIntersection.intersection - ray.position);
+            double currentDistanceFromIntersectionToRay = (currentShapeIntersection.intersection - mainRay.position) 
+                                                        * (currentShapeIntersection.intersection - mainRay.position);
 
             if (!shapeIntersection.intersection || currentDistanceFromIntersectionToRay < distanceFromIntersectionToRay) {
                 shapeIntersection = currentShapeIntersection;
@@ -104,8 +105,8 @@ Vector Scene::castRay(const Ray &ray, unsigned numberOfTimesRecursed) const{
         bool inShadow = false;
 
         //- See if light ray intersects with another shape. If so, a shadow must be cast -//
-        for (unsigned i = 0; i < numberOfShapes && shapeBuffer[i].type != Shape::UNDEFINED; i++) {
-            Shape::Intersection lightRayIntersection = shapeBuffer[i].intersect(rayFromShapeToLight);
+        for (unsigned i = 0; i < numberOfShapes && shapeBuffer[i] != NULL; i++) {
+            Shape::Intersection lightRayIntersection = shapeBuffer[i]->intersect(rayFromShapeToLight);
             if (!lightRayIntersection.intersection.isUndefined() && lightRayIntersection.time < 1) {
                 inShadow = true;
                 break;
@@ -117,10 +118,10 @@ Vector Scene::castRay(const Ray &ray, unsigned numberOfTimesRecursed) const{
 
         //- if there is no shadow, set cBuffColor -//
         if (!inShadow) {
-            Vector normal = closestShape.getNormalAt(shapeIntersection.intersection);
+            Vector normal = closestShape->getNormalAt(shapeIntersection.intersection);
             Vector lightRayReflected = directionToLight.reflectOver(normal);
             Vector directionToViewer = (camera.position - shapeIntersection.intersection).normalise();
-            Shape::Material material = closestShape.material;
+            Shape::Material material = closestShape->material;
 
             double diffuseComponent = directionToLight * normal;
 
@@ -149,10 +150,10 @@ Vector Scene::castRay(const Ray &ray, unsigned numberOfTimesRecursed) const{
 
             if (numberOfTimesRecursed < reflectionDepth && material.reflectivity != 0) {
                 Vector directionToViewerReflected;
-                directionToViewerReflected = ray.direction * (-1);
+                directionToViewerReflected = mainRay.direction * (-1);
                 directionToViewerReflected = directionToViewerReflected.reflectOver(normal);
 
-                Ray rayReflected = ray;
+                Ray rayReflected = mainRay;
                 rayReflected.position = shapeIntersection.intersection;
                 rayReflected.direction = directionToViewerReflected;
 
@@ -173,13 +174,13 @@ Vector Scene::castRay(const Ray &ray, unsigned numberOfTimesRecursed) const{
 
 void Scene::resizeShapeBuffer(unsigned newSize) {
     shapeBufferSize = newSize;
-    Shape *temp = new Shape[shapeBufferSize];
+    Shape **newShapeBuffer = new Shape*[shapeBufferSize];
 
     for (unsigned i = 0; i < numberOfShapes; i++)
-        temp[i] = shapeBuffer[i];
+        newShapeBuffer[i] = shapeBuffer[i];
 
     delete[] shapeBuffer;
-    shapeBuffer = temp;
+    shapeBuffer = newShapeBuffer;
 }
 
 #endif
