@@ -118,6 +118,8 @@ Shape::Intersection Plane::intersect(const Ray &ray) const {
     Shape::Intersection intersect;
     double denominator = (normal * ray.direction);
     if (denominator != 0) {
+        //-- Checking if the ray intersects the plane that the triangle is on
+        //   using the equation for a plane--//
         double solution = -(normal * (ray.position - position)) / denominator;
         if (solution > 1e-10) {
             Vector intersection = solution * ray.direction + ray.position;
@@ -133,12 +135,15 @@ Shape::Intersection Triangle::intersect(const Ray &ray) const {
     double denominator = (normal * ray.direction);
 
     if (denominator != 0) {
+        //-- Checking if the ray intersects the plane that the triangle is on
+        //   using the equation for a plane--//
         double solution = -(normal * (ray.position - vertex1)) / denominator;
         if (solution > 1e-10) {
             Vector intersection = solution * ray.direction + ray.position;
 
             double triangleArea = sqrt(normal * normal) / 2;
 
+            //-- Checking to see if the intersection is inside the triangle using area method --//
             Vector triSegment1Normal = (intersection - vertex1).cross(vertex2 - vertex1);
             double areaOfTriSegment1 = sqrt(triSegment1Normal * triSegment1Normal) / 2;
 
@@ -150,7 +155,6 @@ Shape::Intersection Triangle::intersect(const Ray &ray) const {
 
             double totalArea = areaOfTriSegment1 + areaOfTriSegment2 + areaOfTriSegment3;
             if (totalArea <= triangleArea + 1e-10 && totalArea >= triangleArea - 1e-10) {
-
                 intersect.intersection = intersection;
                 intersect.time = solution;
             }

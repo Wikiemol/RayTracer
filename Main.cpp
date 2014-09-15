@@ -119,10 +119,10 @@ int main() {
                                        50 + pyramidX, 0 + pyramidY, 100 + pyramidZ);
     triangle1->material = triangleMaterial;
 
-    Triangle *triangle2 = new Triangle(-100 + pyramidX, 0 + pyramidY, 0 + pyramidZ,
-                                      -100 + pyramidX, 0 + pyramidY, 50 + pyramidZ,
-                                      100 + pyramidX, 0 + pyramidY, -100 + pyramidZ
-                                      );
+    Triangle *triangle2 = new Triangle(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ,
+                                       -100 + pyramidX, 0 + pyramidY, 50 + pyramidZ,
+                                       100 + pyramidX, 0 + pyramidY, -100 + pyramidZ
+                                       );
     triangle2->material = triangleMaterial;
 
     //- Constructing the scene -//
@@ -133,11 +133,11 @@ int main() {
     scene.addShape(sphere3);
     scene.addShape(sphere2);
     scene.addShape(sphere);
-    /*
+    
     scene.addShape(triangle);
     scene.addShape(triangle1);
     scene.addShape(triangle2);
-    */
+    
     scene.addShape(plane);
 
     ColorBuffer cBuff(width, height);
