@@ -1,7 +1,7 @@
 #ifndef SHAPE_HPP
 #define SHAPE_HPP
 
-#include "Vector.hpp"
+#include "Vector3.hpp"
 #include <math.h>
 #include <time.h>
 
@@ -28,69 +28,69 @@ public:
     };
 
     struct Intersection {
-        Vector intersection;
+        Vector3 intersection;
         double time;
     };
 
     virtual ~Shape(){};
     Material material;
     virtual Shape::Intersection intersect(const Ray &ray) const = 0;
-    virtual Vector getNormalAt(const Vector &point) const = 0;
+    virtual Vector3 getNormalAt(const Vector3 &point) const = 0;
 };
 
 class Sphere: public Shape {
 public:
-    Vector position;
+    Vector3 position;
     Shape::Intersection intersect(const Ray &ray) const;
-    Vector getNormalAt(const Vector &point) const;
+    Vector3 getNormalAt(const Vector3 &point) const;
     double radius;
 };
 
 class Plane: public Shape {
 public:
-    Vector position;
-    Vector normal;
+    Vector3 position;
+    Vector3 normal;
     Shape::Intersection intersect(const Ray &ray) const;
-    Vector getNormalAt(const Vector &point) const;
+    Vector3 getNormalAt(const Vector3 &point) const;
 };
 
 class Triangle: public Shape {
 
 public:
-    Triangle(const Vector &vert1, const Vector &vert2, const Vector &vert3) {
+    Triangle(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3) {
         init(vert1, vert2, vert3);
     }
     
     Triangle(double x1, double y1, double z1, 
              double x2, double y2, double z2, 
              double x3, double y3, double z3) {
-        Vector vert1(x1, y1, z1);
-        Vector vert2(x2, y2, z2);
-        Vector vert3(x3, y3, z3);
+        Vector3 vert1(x1, y1, z1);
+        Vector3 vert2(x2, y2, z2);
+        Vector3 vert3(x3, y3, z3);
 
         init(vert1, vert2, vert3);
     }
 
     Shape::Intersection intersect(const Ray &ray) const;
-    Vector getNormalAt(const Vector &point) const;
+    Vector3 getNormalAt(const Vector3 &point) const;
 
 private:
-    void init(const Vector &vert1, const Vector &vert2, const Vector &vert3) {
+    void init(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3) {
         vertex1 = vert1;
         vertex2 = vert2;
         vertex3 = vert3;
 
         position = (1 / 3.0) * (vertex1 + vertex2 + vertex3);
 
-        Vector side1 = vertex1 - vertex2;
-        Vector side2 = vertex3 - vertex2;
+        Vector3 side1 = vertex1 - vertex2;
+        Vector3 side2 = vertex3 - vertex2;
         normal = side1.cross(side2);
     };
-    Vector vertex1;
-    Vector vertex2;
-    Vector vertex3;
-    Vector normal;
-    Vector position;
+    Vector3 vertex1;
+    Vector3 vertex2;
+    Vector3 vertex3;
+    Vector3 normal;
+    Vector3 position;
 };
 
 Shape::Intersection Sphere::intersect(const Ray &ray) const {
@@ -106,7 +106,7 @@ Shape::Intersection Sphere::intersect(const Ray &ray) const {
     if (descriminant >= 0) {
         double solution = (-b - sqrt(descriminant)) / (2 * a);
         if (solution > 1e-10) {
-            Vector intersection = solution * ray.direction + ray.position;
+            Vector3 intersection = solution * ray.direction + ray.position;
             intersect.intersection = intersection;
             intersect.time = solution;
         }
@@ -122,7 +122,7 @@ Shape::Intersection Plane::intersect(const Ray &ray) const {
         //   using the equation for a plane--//
         double solution = -(normal * (ray.position - position)) / denominator;
         if (solution > 1e-10) {
-            Vector intersection = solution * ray.direction + ray.position;
+            Vector3 intersection = solution * ray.direction + ray.position;
             intersect.intersection = intersection;
             intersect.time = solution;
         }
@@ -139,18 +139,18 @@ Shape::Intersection Triangle::intersect(const Ray &ray) const {
         //   using the equation for a plane--//
         double solution = -(normal * (ray.position - vertex1)) / denominator;
         if (solution > 1e-10) {
-            Vector intersection = solution * ray.direction + ray.position;
+            Vector3 intersection = solution * ray.direction + ray.position;
 
             double triangleArea = sqrt(normal * normal) / 2;
 
             //-- Checking to see if the intersection is inside the triangle using area method --//
-            Vector triSegment1Normal = (intersection - vertex1).cross(vertex2 - vertex1);
+            Vector3 triSegment1Normal = (intersection - vertex1).cross(vertex2 - vertex1);
             double areaOfTriSegment1 = sqrt(triSegment1Normal * triSegment1Normal) / 2;
 
-            Vector triSegment2Normal = (intersection - vertex2).cross(vertex3 - vertex2);
+            Vector3 triSegment2Normal = (intersection - vertex2).cross(vertex3 - vertex2);
             double areaOfTriSegment2 = sqrt(triSegment2Normal * triSegment2Normal) / 2;
 
-            Vector triSegment3Normal = (intersection - vertex3).cross(vertex1 - vertex3);
+            Vector3 triSegment3Normal = (intersection - vertex3).cross(vertex1 - vertex3);
             double areaOfTriSegment3 = sqrt(triSegment3Normal * triSegment3Normal) / 2;
 
             double totalArea = areaOfTriSegment1 + areaOfTriSegment2 + areaOfTriSegment3;
@@ -164,16 +164,16 @@ Shape::Intersection Triangle::intersect(const Ray &ray) const {
     return intersect;
 }
 
-Vector Sphere::getNormalAt(const Vector &point) const {
-        Vector norm = (point - position).normalise();
+Vector3 Sphere::getNormalAt(const Vector3 &point) const {
+        Vector3 norm = (point - position).normalise();
         return norm;
 }
 
-Vector Plane::getNormalAt(const Vector &point) const {
+Vector3 Plane::getNormalAt(const Vector3 &point) const {
         return normal.normalise();
 }
 
-Vector Triangle::getNormalAt(const Vector &point) const {
+Vector3 Triangle::getNormalAt(const Vector3 &point) const {
     return normal.normalise();
 }
 #endif

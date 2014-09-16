@@ -1,13 +1,14 @@
 #include <iostream>
 #include "ColorBuffer.hpp"
-#include "Vector.hpp"
+#include "Vector3.hpp"
 #include "Shape.hpp"
 #include "Scene.hpp"
+#include "Matrix.hpp"
 
 int main() {
     const unsigned numberOfShapes = 10;
-    Vector a(1, 2, 3);
-    Vector b(4, 5, 6);
+    Vector3 a(1, 2, 3);
+    Vector3 b(4, 5, 6);
 
     unsigned width = 500;
     unsigned height = 500;
@@ -147,12 +148,12 @@ int main() {
     for (int x = -cameraViewXBound; x < cameraViewXBound; x++) {
         for (int y = -cameraViewYBound; y < cameraViewYBound; y++) {
             //- Anti-Aliasing by averaging -//
-            Vector colorVector1 = scene.getColorAt(x, y);
-            Vector colorVector2 = scene.getColorAt(x + 0.5, y);
-            Vector colorVector3 = scene.getColorAt(x + 0.5, y + 0.5);
-            Vector colorVector4 = scene.getColorAt(x, y + 0.5);
+            Vector3 colorVector1 = scene.getColorAt(x, y);
+            Vector3 colorVector2 = scene.getColorAt(x + 0.5, y);
+            Vector3 colorVector3 = scene.getColorAt(x + 0.5, y + 0.5);
+            Vector3 colorVector4 = scene.getColorAt(x, y + 0.5);
 
-            Vector colorVector = (colorVector1 + colorVector2 + colorVector3 + colorVector4) * (1 / 4.0);
+            Vector3 colorVector = (colorVector1 + colorVector2 + colorVector3 + colorVector4) * (1 / 4.0);
             cBuff.setStrokeColor(colorVector[0], colorVector[1], colorVector[2]);
             cBuff.setColorAt(x + width / 2, -y - 1 + height / 2);
         }

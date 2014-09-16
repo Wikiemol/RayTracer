@@ -2,18 +2,18 @@
 #define SCENE_HPP
 
 #include "Shape.hpp"
-#include "Vector.hpp"
+#include "Vector3.hpp"
 
 class Scene {
 public:
     struct Camera {
-        Vector direction;
-        Vector position;
+        Vector3 direction;
+        Vector3 position;
         double focalLength;
     };
 
     struct PointLight {
-        Vector position;
+        Vector3 position;
         double intensity;
     };
 
@@ -22,14 +22,14 @@ public:
     Scene();
     ~Scene();
     void addShape(Shape *shape);
-    Vector getColorAt(double x, double y);
+    Vector3 getColorAt(double x, double y);
     int reflectionDepth;
 private:
     Shape** shapeBuffer;
     unsigned numberOfShapes;
     unsigned shapeBufferSize;
     void resizeShapeBuffer(unsigned newSize);
-    Vector castRay(const Ray &ray, unsigned numberOfTimesRecursed) const;
+    Vector3 castRay(const Ray &ray, unsigned numberOfTimesRecursed) const;
 };
 
 Scene::Scene() {
@@ -55,9 +55,9 @@ void Scene::addShape(Shape *shape) {
     numberOfShapes++;
 }
 
-Vector Scene::getColorAt(double x, double y) {
+Vector3 Scene::getColorAt(double x, double y) {
     //- current point on lens plane -//
-    Vector pointOnLensPlane(x, y, -camera.focalLength);
+    Vector3 pointOnLensPlane(x, y, -camera.focalLength);
 
     //- cast ray -//
     Ray rayFromCameraToLens;
@@ -67,7 +67,7 @@ Vector Scene::getColorAt(double x, double y) {
 }
 
 //- returns a vector representing color -//
-Vector Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const {
+Vector3 Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const {
     //-find closest intersection/closest shape-//
     Shape::Intersection shapeIntersection;
     Shape *closestShape;
@@ -97,7 +97,7 @@ Vector Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const 
     if (!shapeIntersection.intersection.isUndefined()) {
         //- We mustn't normalize the directionToLight vector yet, as we need its full length
         //- to test for shadows.
-        Vector directionToLight = (pointLight.position - shapeIntersection.intersection);
+        Vector3 directionToLight = (pointLight.position - shapeIntersection.intersection);
         Ray rayFromShapeToLight;
         rayFromShapeToLight.position = shapeIntersection.intersection;
         rayFromShapeToLight.direction = directionToLight;
@@ -118,9 +118,9 @@ Vector Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const 
 
         //- if there is no shadow, set cBuffColor -//
         if (!inShadow) {
-            Vector normal = closestShape->getNormalAt(shapeIntersection.intersection);
-            Vector lightRayReflected = directionToLight.reflectOver(normal);
-            Vector directionToViewer = (camera.position - shapeIntersection.intersection).normalise();
+            Vector3 normal = closestShape->getNormalAt(shapeIntersection.intersection);
+            Vector3 lightRayReflected = directionToLight.reflectOver(normal);
+            Vector3 directionToViewer = (camera.position - shapeIntersection.intersection).normalise();
             Shape::Material material = closestShape->material;
 
             double diffuseComponent = directionToLight * normal;
@@ -146,10 +146,10 @@ Vector Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const 
             if (b > 255)
                 b = 255;
 
-            Vector colorVector(r, g, b);
+            Vector3 colorVector(r, g, b);
 
             if (numberOfTimesRecursed < reflectionDepth && material.reflectivity != 0) {
-                Vector directionToViewerReflected;
+                Vector3 directionToViewerReflected;
                 directionToViewerReflected = mainRay.direction * (-1);
                 directionToViewerReflected = directionToViewerReflected.reflectOver(normal);
 
@@ -157,18 +157,18 @@ Vector Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const 
                 rayReflected.position = shapeIntersection.intersection;
                 rayReflected.direction = directionToViewerReflected;
 
-                Vector reflectionColor = castRay(rayReflected, ++numberOfTimesRecursed) * material.reflectivity;
+                Vector3 reflectionColor = castRay(rayReflected, ++numberOfTimesRecursed) * material.reflectivity;
                 colorVector = colorVector * (1 - material.reflectivity);
                 colorVector = colorVector + reflectionColor;
             }
 
             return colorVector;
         } else {
-            Vector colorVector(0, 0, 0);
+            Vector3 colorVector(0, 0, 0);
             return colorVector;
         }
     }
-    Vector backgroundVector(0, 0, 0);
+    Vector3 backgroundVector(0, 0, 0);
     return backgroundVector;
 }
 
