@@ -1,5 +1,7 @@
 #include "Vector4.hpp"
 #include "math.h"
+#ifndef MATRIX_HPP
+#define MATRIX_HPP
 class Matrix {
 public:
     Matrix(double, double, double, double,
@@ -100,5 +102,10 @@ Matrix Matrix::operator *(const Matrix &m) const {
 }
 
 Vector4 Matrix::operator *(const Vector4 &v)const {
-    return v;
+    Vector4 result(0, 0, 0, 0);
+    for (int i = 0; i < 4; i++) {
+        result.setAt(i, this->getRowVector(i) * v);
+    }
+    return result;
 }
+#endif

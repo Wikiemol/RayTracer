@@ -28,6 +28,7 @@ public:
     bool isUndefined() const;
     Vector3 reflectOver(const Vector3 &vec) const;
     Vector3 cross(const Vector3 &b) const;
+    void setAt(int i, double value);
 
     //- Static Methods -//
     static Vector3 rand();
@@ -141,6 +142,10 @@ Vector3 Vector3::cross(const Vector3 &b) const {
                   (vectorArray[2] * b[0] - vectorArray[0] * b[2]),
                   vectorArray[0] * b[1] - vectorArray[1] * b[0]);
     return result;
+}
+
+void Vector3::setAt(int i, double value) {
+    vectorArray[i] = value;
 }
 
 //- Static Methods -//

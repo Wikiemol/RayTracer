@@ -2,9 +2,11 @@
 #define SHAPE_HPP
 
 #include "Vector3.hpp"
+#include "Matrix.hpp"
 #include <math.h>
 #include <time.h>
 
+//-Shape SuperClass-//
 class Shape {
 public:
     struct Material {
@@ -36,26 +38,35 @@ public:
     Material material;
     virtual Shape::Intersection intersect(const Ray &ray) const = 0;
     virtual Vector3 getNormalAt(const Vector3 &point) const = 0;
+    virtual void transform(double translateX, double translateY, double translateZ, 
+                           double rotateX, double rotateY, double rotateZ) = 0;
 };
 
+//- Shape Type Headers -//
+//-Sphere
 class Sphere: public Shape {
 public:
     Vector3 position;
     Shape::Intersection intersect(const Ray &ray) const;
     Vector3 getNormalAt(const Vector3 &point) const;
+    void transform(double translateX, double translateY, double translateZ, 
+                   double rotateX, double rotateY, double rotateZ);
     double radius;
 };
 
+//-Plane
 class Plane: public Shape {
 public:
     Vector3 position;
     Vector3 normal;
     Shape::Intersection intersect(const Ray &ray) const;
     Vector3 getNormalAt(const Vector3 &point) const;
+    void transform(double translateX, double translateY, double translateZ, 
+                   double rotateX, double rotateY, double rotateZ);
 };
 
+//-Triangle
 class Triangle: public Shape {
-
 public:
     Triangle(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3) {
         init(vert1, vert2, vert3);
@@ -73,6 +84,8 @@ public:
 
     Shape::Intersection intersect(const Ray &ray) const;
     Vector3 getNormalAt(const Vector3 &point) const;
+    void transform(double translateX, double translateY, double translateZ, 
+                   double rotateX, double rotateY, double rotateZ);
 
 private:
     void init(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3) {
@@ -93,6 +106,8 @@ private:
     Vector3 position;
 };
 
+//- Shape Intersection Functions -//
+//-Sphere
 Shape::Intersection Sphere::intersect(const Ray &ray) const {
     Shape::Intersection intersect;
     double a = ray.direction * ray.direction;
@@ -114,6 +129,7 @@ Shape::Intersection Sphere::intersect(const Ray &ray) const {
     return intersect;
 }
 
+//-Plane
 Shape::Intersection Plane::intersect(const Ray &ray) const {
     Shape::Intersection intersect;
     double denominator = (normal * ray.direction);
@@ -130,6 +146,7 @@ Shape::Intersection Plane::intersect(const Ray &ray) const {
     return intersect;
 }
 
+//-Triangle
 Shape::Intersection Triangle::intersect(const Ray &ray) const {
     Shape::Intersection intersect;
     double denominator = (normal * ray.direction);
@@ -164,16 +181,64 @@ Shape::Intersection Triangle::intersect(const Ray &ray) const {
     return intersect;
 }
 
+//- Normal Functions -//
+//-Sphere
 Vector3 Sphere::getNormalAt(const Vector3 &point) const {
         Vector3 norm = (point - position).normalise();
         return norm;
 }
 
+//-Plane
 Vector3 Plane::getNormalAt(const Vector3 &point) const {
         return normal.normalise();
 }
 
+//-Triangle
 Vector3 Triangle::getNormalAt(const Vector3 &point) const {
     return normal.normalise();
+
+}
+
+//- Shape Translation Functions -//
+//-Sphere
+void Sphere::transform(double translateX, double translateY, double translateZ, 
+                       double rotateX, double rotateY, double rotateZ) {
+
+    Matrix transform = Matrix::createTransformationMatrix(translateX, translateY, translateZ, 
+                                                          rotateX, rotateY, rotateZ);
+
+    Vector4 position4 = transform * Vector4::vec3ToVec4(position, 1);
+    position(position4[0], position4[1], position4[2]);
+}
+
+//-Plane
+void Plane::transform(double translateX, double translateY, double translateZ, 
+                      double rotateX, double rotateY, double rotateZ) {
+
+    Matrix transform = Matrix::createTransformationMatrix(0, 0, 0, 
+                                                          rotateX, rotateY, rotateZ);
+    Vector3 translate(translateX, translateY, translateZ);
+    position = position + translate;
+
+    Vector4 normal4 = transform * Vector4::vec3ToVec4(normal, 0);
+    normal(normal4[0], normal4[1], normal4[2]);
+}
+
+//-Triangle
+void Triangle::transform(double translateX, double translateY, double translateZ, 
+                         double rotateX, double rotateY, double rotateZ) {
+
+    Matrix transform = Matrix::createTransformationMatrix(translateX, translateY, translateZ, 
+                                                          rotateX, rotateY, rotateZ);
+
+    Vector4 vertex1_4 = transform * Vector4::vec3ToVec4(vertex1, 1);
+    Vector4 vertex2_4 = transform * Vector4::vec3ToVec4(vertex2, 1);
+    Vector4 vertex3_4 = transform * Vector4::vec3ToVec4(vertex3, 1);
+
+    vertex1(vertex1_4[0], vertex1_4[1], vertex1_4[2]);
+    vertex2(vertex2_4[0], vertex2_4[1], vertex2_4[2]);
+    vertex3(vertex3_4[0], vertex3_4[1], vertex3_4[2]);
+    
+    init(vertex1, vertex2, vertex3);
 }
 #endif

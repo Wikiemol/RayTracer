@@ -1,3 +1,6 @@
+#include "Vector3.hpp"
+#ifndef VECTOR4_HPP
+#define VECTOR4_HPP
 class Vector4 {
 public:
     Vector4(double a, double b, double c, double d);
@@ -6,7 +9,13 @@ public:
     Vector4 operator +(const Vector4 &b) const;
     Vector4 operator -(const Vector4 &b) const;
     double operator[](int i) const;
+    void print() const;
+    void setAt(int i, double value);
     bool isUndefined() const;
+    static Vector4 vec3ToVec4(Vector3 vector, double last) {
+        Vector4 result(vector[0], vector[1], vector[2], last);
+        return result;
+    }
 private:
     double vectorArray[4];
     bool undefined;
@@ -53,6 +62,14 @@ bool Vector4::isUndefined() const {
     return undefined;
 }
 
+void Vector4::print() const {
+    std::cout << "[" << vectorArray[0] << ", " << vectorArray[1] << ", " << vectorArray[2] << ", " << vectorArray[3] << "]\n";
+}
+
+void Vector4::setAt(int i, double value) {
+    vectorArray[i] = value;
+}
+
 void Vector4::throwErrorIfUndefined(const Vector4 &b) const {
     if (b.isUndefined()) {
         throw std::runtime_error("Vector4 passed as argument is uninitialized.");
@@ -68,3 +85,4 @@ void Vector4::throwErrorIfUndefined() const {
         throw std::runtime_error("Method or operator called on uninitialized Vector4.");
     }
 }
+#endif

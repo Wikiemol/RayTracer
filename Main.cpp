@@ -9,7 +9,6 @@ int main() {
     const unsigned numberOfShapes = 10;
     Vector3 a(1, 2, 3);
     Vector3 b(4, 5, 6);
-
     unsigned width = 500;
     unsigned height = 500;
 
@@ -125,6 +124,10 @@ int main() {
                                        100 + pyramidX, 0 + pyramidY, -100 + pyramidZ
                                        );
     triangle2->material = triangleMaterial;
+
+    triangle->transform(100, 100, 100, 0, 0, 0);
+    triangle1->transform(100, 100, 100, 0, 0, 0);
+    triangle2->transform(100, 100, 100, 0, 0, 0);
 
     //- Constructing the scene -//
     Scene scene;
