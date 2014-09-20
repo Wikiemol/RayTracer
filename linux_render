@@ -1,0 +1,3 @@
+#!/bin/bash
+
+g++ -std=c++11 Main.cpp && time ./a.out && convert pictures/output.ppm pictures/pngoutput.png && see pictures/pngoutput.png
