@@ -1,3 +1,15 @@
+/* This File contains 4 classes, one Shape super-class,
+ * and three subclasses of Shape: Sphere, Plane, and Triangle.
+ * Because all subclasses of shape have the same overridden functions
+ * that often need to be edited at the same time, or to be compared,
+ * the file is seperated into the following sections:
+ * -Shape SuperClass Header
+ * -Subclass Headers
+ * -Constructors
+ * -Intersection Functions
+ * -Normal Functions
+ * -Translation Functions
+ */
 #ifndef SHAPE_HPP
 #define SHAPE_HPP
 
@@ -36,6 +48,8 @@ public:
 
     virtual ~Shape(){};
     Material material;
+    //The shape will be rotated with respect to the center
+    Vector3 center;
     virtual Shape::Intersection intersect(const Ray &ray) const = 0;
     virtual Vector3 getNormalAt(const Vector3 &point) const = 0;
     virtual void transform(double translateX, double translateY, double translateZ, 
@@ -43,44 +57,44 @@ public:
 };
 
 //- Shape Type Headers -//
-//-Sphere
+//Sphere
 class Sphere: public Shape {
 public:
     Vector3 position;
+    double radius;
+
+    Sphere(double posX, double posY, double posZ, double radius);
+    Sphere(Vector3 pos, double radius);
     Shape::Intersection intersect(const Ray &ray) const;
     Vector3 getNormalAt(const Vector3 &point) const;
     void transform(double translateX, double translateY, double translateZ, 
                    double rotateX, double rotateY, double rotateZ);
-    double radius;
 };
 
-//-Plane
+//Plane
 class Plane: public Shape {
 public:
     Vector3 position;
     Vector3 normal;
+
+    Plane(double posX, double posY, double posZ, Vector3 norm);
+    Plane(Vector3 pos, Vector3 norm);
     Shape::Intersection intersect(const Ray &ray) const;
     Vector3 getNormalAt(const Vector3 &point) const;
     void transform(double translateX, double translateY, double translateZ, 
                    double rotateX, double rotateY, double rotateZ);
 };
 
-//-Triangle
+//Triangle
 class Triangle: public Shape {
 public:
-    Triangle(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3) {
-        init(vert1, vert2, vert3);
-    }
-    
+    Triangle(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3);
+
     Triangle(double x1, double y1, double z1, 
              double x2, double y2, double z2, 
-             double x3, double y3, double z3) {
-        Vector3 vert1(x1, y1, z1);
-        Vector3 vert2(x2, y2, z2);
-        Vector3 vert3(x3, y3, z3);
+             double x3, double y3, double z3);
 
-        init(vert1, vert2, vert3);
-    }
+    void init(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3);
 
     Shape::Intersection intersect(const Ray &ray) const;
     Vector3 getNormalAt(const Vector3 &point) const;
@@ -88,17 +102,6 @@ public:
                    double rotateX, double rotateY, double rotateZ);
 
 private:
-    void init(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3) {
-        vertex1 = vert1;
-        vertex2 = vert2;
-        vertex3 = vert3;
-
-        position = (1 / 3.0) * (vertex1 + vertex2 + vertex3);
-
-        Vector3 side1 = vertex1 - vertex2;
-        Vector3 side2 = vertex3 - vertex2;
-        normal = side1.cross(side2);
-    };
     Vector3 vertex1;
     Vector3 vertex2;
     Vector3 vertex3;
@@ -106,8 +109,58 @@ private:
     Vector3 position;
 };
 
+//- Shape Constructors -//
+//Sphere
+Sphere::Sphere(double posX, double posY, double posZ, double radius) {
+    this->radius = radius;
+    position(posX, posY, posZ);
+    center(posX, posY, posZ);
+}
+Sphere::Sphere(Vector3 pos, double radius) {
+    this->radius = radius;
+    position = pos;
+    center = pos;
+}
+//Plane
+Plane::Plane(double posX, double posY, double posZ, Vector3 norm) {
+    normal = norm;
+    position(posX, posY, posZ);
+    center(posX, posY, posZ);
+}
+Plane::Plane(Vector3 pos, Vector3 norm) {
+    normal = norm;
+    position = pos;
+    center = pos;
+}
+//Triangle
+Triangle::Triangle(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3) {
+    init(vert1, vert2, vert3);
+}
+
+Triangle::Triangle(double x1, double y1, double z1, 
+                   double x2, double y2, double z2, 
+                   double x3, double y3, double z3) {
+    Vector3 vert1(x1, y1, z1);
+    Vector3 vert2(x2, y2, z2);
+    Vector3 vert3(x3, y3, z3);
+
+    init(vert1, vert2, vert3);
+}
+void Triangle::init(const Vector3 &vert1, const Vector3 &vert2, const Vector3 &vert3) {
+    vertex1 = vert1;
+    vertex2 = vert2;
+    vertex3 = vert3;
+
+    position = (1 / 3.0) * (vertex1 + vertex2 + vertex3);
+    center = position;
+
+    Vector3 side1 = vertex1 - vertex2;
+    Vector3 side2 = vertex3 - vertex2;
+    normal = side1.cross(side2);
+};
+
 //- Shape Intersection Functions -//
-//-Sphere
+//Sphere
 Shape::Intersection Sphere::intersect(const Ray &ray) const {
     Shape::Intersection intersect;
     double a = ray.direction * ray.direction;
@@ -129,7 +182,7 @@ Shape::Intersection Sphere::intersect(const Ray &ray) const {
     return intersect;
 }
 
-//-Plane
+//Plane
 Shape::Intersection Plane::intersect(const Ray &ray) const {
     Shape::Intersection intersect;
     double denominator = (normal * ray.direction);
@@ -146,7 +199,7 @@ Shape::Intersection Plane::intersect(const Ray &ray) const {
     return intersect;
 }
 
-//-Triangle
+//Triangle
 Shape::Intersection Triangle::intersect(const Ray &ray) const {
     Shape::Intersection intersect;
     double denominator = (normal * ray.direction);
@@ -182,25 +235,25 @@ Shape::Intersection Triangle::intersect(const Ray &ray) const {
 }
 
 //- Normal Functions -//
-//-Sphere
+//Sphere
 Vector3 Sphere::getNormalAt(const Vector3 &point) const {
         Vector3 norm = (point - position).normalise();
         return norm;
 }
 
-//-Plane
+//Plane
 Vector3 Plane::getNormalAt(const Vector3 &point) const {
         return normal.normalise();
 }
 
-//-Triangle
+//Triangle
 Vector3 Triangle::getNormalAt(const Vector3 &point) const {
     return normal.normalise();
 
 }
 
 //- Shape Translation Functions -//
-//-Sphere
+//Sphere
 void Sphere::transform(double translateX, double translateY, double translateZ, 
                        double rotateX, double rotateY, double rotateZ) {
 
@@ -211,7 +264,7 @@ void Sphere::transform(double translateX, double translateY, double translateZ,
     position(position4[0], position4[1], position4[2]);
 }
 
-//-Plane
+//Plane
 void Plane::transform(double translateX, double translateY, double translateZ, 
                       double rotateX, double rotateY, double rotateZ) {
 
@@ -224,10 +277,13 @@ void Plane::transform(double translateX, double translateY, double translateZ,
     normal(normal4[0], normal4[1], normal4[2]);
 }
 
-//-Triangle
+//Triangle
 void Triangle::transform(double translateX, double translateY, double translateZ, 
                          double rotateX, double rotateY, double rotateZ) {
 
+    vertex1 = vertex1 - center;
+    vertex2 = vertex2 - center;
+    vertex3 = vertex3 - center;
     Matrix transform = Matrix::createTransformationMatrix(translateX, translateY, translateZ, 
                                                           rotateX, rotateY, rotateZ);
 
@@ -238,7 +294,7 @@ void Triangle::transform(double translateX, double translateY, double translateZ
     vertex1(vertex1_4[0], vertex1_4[1], vertex1_4[2]);
     vertex2(vertex2_4[0], vertex2_4[1], vertex2_4[2]);
     vertex3(vertex3_4[0], vertex3_4[1], vertex3_4[2]);
-    
-    init(vertex1, vertex2, vertex3);
+
+    init(vertex1 + center, vertex2 + center, vertex3 + center);
 }
 #endif

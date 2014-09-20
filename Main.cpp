@@ -80,29 +80,20 @@ int main() {
     triangleMaterial.blue = 50;
 
     //- Shapes -//
-    Sphere *sphere = new Sphere();
-    sphere->position(100, -100, 0);
-    sphere->radius = 100;
+    Sphere *sphere = new Sphere(100, -100, 0, 100);
     sphere->material = sphereMaterial;
 
-    Sphere *sphere2 = new Sphere();
-    sphere2->position(300, -100, 150);
-    sphere2->radius = 100;
+    Sphere *sphere2 = new Sphere(300, -100, 150, 100);
     sphere2->material = sphere2Material;
 
-    Sphere *sphere3 = new Sphere();
-    sphere3->position(-50, -100, 150);
-    sphere3->radius = 100;
+    Sphere *sphere3 = new Sphere(-50, -100, 150, 100);
     sphere3->material = sphere3Material;
 
-    Sphere *sphere4 = new Sphere();
-    sphere4->position(100, -150, 300);
-    sphere4->radius = 50;
+    Sphere *sphere4 = new Sphere(100, -150, 300, 50);
     sphere4->material = sphere4Material;
 
-    Plane *plane = new Plane();
-    plane->position(0, -200, -100);
-    plane->normal(0, 1, 0);
+    Vector3 planeNormal(0, 1, 0);
+    Plane *plane = new Plane(0, -200, -100, planeNormal);
     plane->material = planeMaterial;
 
 
@@ -125,9 +116,14 @@ int main() {
                                        );
     triangle2->material = triangleMaterial;
 
-    triangle->transform(100, 100, 100, 0, 0, 0);
-    triangle1->transform(100, 100, 100, 0, 0, 0);
-    triangle2->transform(100, 100, 100, 0, 0, 0);
+    double theta = M_PI;
+    triangle->center(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ);
+    triangle1->center(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ);
+    triangle2->center(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ);
+
+    triangle->transform(100, 100, 100, theta, 0, 0);
+    triangle1->transform(100, 100, 100, theta, 0, 0);
+    triangle2->transform(100, 100, 100, theta, 0, 0);
 
     //- Constructing the scene -//
     Scene scene;
