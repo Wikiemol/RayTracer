@@ -237,6 +237,7 @@ Shape::Intersection Triangle::intersect(const Ray &ray) const {
 //- Normal Functions -//
 //Sphere
 Vector3 Sphere::getNormalAt(const Vector3 &point) const {
+        //- Assumes the point given is on the sphere -//
         Vector3 norm = (point - position).normalise();
         return norm;
 }
@@ -256,11 +257,12 @@ Vector3 Triangle::getNormalAt(const Vector3 &point) const {
 //Sphere
 void Sphere::transform(double translateX, double translateY, double translateZ, 
                        double rotateX, double rotateY, double rotateZ) {
-
+    position = position - center;
     Matrix transform = Matrix::createTransformationMatrix(translateX, translateY, translateZ, 
                                                           rotateX, rotateY, rotateZ);
 
     Vector4 position4 = transform * Vector4::vec3ToVec4(position, 1);
+    position = position + center;
     position(position4[0], position4[1], position4[2]);
 }
 
@@ -268,12 +270,14 @@ void Sphere::transform(double translateX, double translateY, double translateZ,
 void Plane::transform(double translateX, double translateY, double translateZ, 
                       double rotateX, double rotateY, double rotateZ) {
 
-    Matrix transform = Matrix::createTransformationMatrix(0, 0, 0, 
+    position = position - center;
+    Matrix transform = Matrix::createTransformationMatrix(translateX, translateY, translateZ, 
                                                           rotateX, rotateY, rotateZ);
-    Vector3 translate(translateX, translateY, translateZ);
-    position = position + translate;
 
     Vector4 normal4 = transform * Vector4::vec3ToVec4(normal, 0);
+    Vector4 position4 = transform * Vector4::vec3ToVec4(position, 1);
+    position(position4[0], position4[1], position4[2]);
+    position = position + center;
     normal(normal4[0], normal4[1], normal4[2]);
 }
 

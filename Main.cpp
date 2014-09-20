@@ -91,10 +91,13 @@ int main() {
 
     Sphere *sphere4 = new Sphere(100, -150, 300, 50);
     sphere4->material = sphere4Material;
+    
+    sphere4->transform(0, 100, 0, 0, 0, 0);
 
     Vector3 planeNormal(0, 1, 0);
     Plane *plane = new Plane(0, -200, -100, planeNormal);
     plane->material = planeMaterial;
+    //plane->transform(0, 0, 0, 0, 0, M_PI/6);
 
 
     double pyramidX = -100;
@@ -116,7 +119,7 @@ int main() {
                                        );
     triangle2->material = triangleMaterial;
 
-    double theta = M_PI;
+    double theta = -M_PI / 6;
     triangle->center(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ);
     triangle1->center(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ);
     triangle2->center(0 + pyramidX, 100 + pyramidY, 0 + pyramidZ);
