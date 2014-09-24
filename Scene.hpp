@@ -3,6 +3,7 @@
 
 #include "Shape.hpp"
 #include "Vector3.hpp"
+#include <math.h>
 
 class Scene {
 public:
@@ -17,19 +18,26 @@ public:
         double intensity;
     };
 
+    struct AreaLight {
+        Vector3 position;
+        double radius;
+        double intensity;
+    };
+
     Camera camera;
-    PointLight pointLight;
+    AreaLight areaLight;
     Scene();
     ~Scene();
     void addShape(Shape *shape);
     Vector3 getColorAt(double x, double y);
     int reflectionDepth;
+    int numberOfCasts;
 private:
     Shape** shapeBuffer;
     unsigned numberOfShapes;
     unsigned shapeBufferSize;
     void resizeShapeBuffer(unsigned newSize);
-    Vector3 castRay(const Ray &ray, unsigned numberOfTimesRecursed) const;
+    Vector3 castRay(const Ray &ray, unsigned numberOfTimesRecursed, unsigned numberOfCasts) const;
 };
 
 Scene::Scene() {
@@ -37,6 +45,7 @@ Scene::Scene() {
     shapeBuffer = new Shape*[shapeBufferSize];
     numberOfShapes = 0;
     reflectionDepth = 3;
+    numberOfCasts = 102;
 }
 
 Scene::~Scene() {
@@ -63,11 +72,25 @@ Vector3 Scene::getColorAt(double x, double y) {
     Ray rayFromCameraToLens;
     rayFromCameraToLens.position = camera.position;
     rayFromCameraToLens.direction = pointOnLensPlane.normalise();
-    return castRay(rayFromCameraToLens, 0);
+
+    Vector3 averageColor(0, 0, 0);
+    for(unsigned castsSoFar = 0; castsSoFar < numberOfCasts; castsSoFar++) {
+        averageColor = averageColor + castRay(rayFromCameraToLens, 0, castsSoFar);
+    }
+
+    averageColor = averageColor * (1 / ((double) numberOfCasts));
+    return averageColor;
 }
 
 //- returns a vector representing color -//
-Vector3 Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const {
+Vector3 Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed, unsigned numberOfCastsSoFar) const {
+    double disToCenter = sqrt((areaLight.radius / numberOfCasts) * numberOfCastsSoFar);
+    PointLight pointLight;
+    pointLight.position(disToCenter * cos((4 * M_PI / numberOfCasts) * numberOfCastsSoFar),
+                        0,
+                        disToCenter * sin((4 * M_PI / numberOfCasts) * numberOfCastsSoFar));
+    pointLight.position = pointLight.position + areaLight.position;
+    pointLight.intensity = areaLight.intensity;
     //-find closest intersection/closest shape-//
     Shape::Intersection shapeIntersection;
     Shape *closestShape;
@@ -157,7 +180,7 @@ Vector3 Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed) const
                 rayReflected.position = shapeIntersection.intersection;
                 rayReflected.direction = directionToViewerReflected;
 
-                Vector3 reflectionColor = castRay(rayReflected, ++numberOfTimesRecursed) * material.reflectivity;
+                Vector3 reflectionColor = castRay(rayReflected, ++numberOfTimesRecursed, numberOfCastsSoFar) * material.reflectivity;
                 colorVector = colorVector * (1 - material.reflectivity);
                 colorVector = colorVector + reflectionColor;
             }

@@ -19,10 +19,9 @@ int main() {
     camera.focalLength = 600;
 
     //- Scene light -//
-    Scene::PointLight pointLight;
-    pointLight.position(1000, 1000, 1000);
-    //pointLight.position(0, 10, 0);
-    pointLight.intensity = 1;
+    Scene::AreaLight areaLight;
+    areaLight.position(1000, 1000, 1000);
+    areaLight.intensity = 1;
 
     //- Materials -//
     Shape::Material sphereMaterial;
@@ -131,7 +130,7 @@ int main() {
     //- Constructing the scene -//
     Scene scene;
     scene.camera = camera;
-    scene.pointLight = pointLight;
+    scene.areaLight = areaLight;
     scene.addShape(sphere4);
     scene.addShape(sphere3);
     scene.addShape(sphere2);
@@ -149,6 +148,11 @@ int main() {
     double cameraViewYBound = height / 2;
     for (int x = -cameraViewXBound; x < cameraViewXBound; x++) {
         for (int y = -cameraViewYBound; y < cameraViewYBound; y++) {
+            int iteration = (x + cameraViewXBound) * height + (y + cameraViewYBound);
+            if (iteration % 100 == 0) {
+                std::cout << "\r" << (int) (100 * iteration / ((double) width * height))  << "\% complete";
+            }
+
             //- Anti-Aliasing by averaging -//
             Vector3 colorVector1 = scene.getColorAt(x, y);
             Vector3 colorVector2 = scene.getColorAt(x + 0.5, y);
