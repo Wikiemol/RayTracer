@@ -4,6 +4,8 @@
 #include "Shape.hpp"
 #include "Vector3.hpp"
 #include <math.h>
+#include <time.h>
+#include <iostream>
 
 class Scene {
 public:
@@ -84,11 +86,11 @@ Vector3 Scene::getColorAt(double x, double y) {
 
 //- returns a vector representing color -//
 Vector3 Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed, unsigned numberOfCastsSoFar) const {
-    double disToCenter = (areaLight.radius / numberOfCasts) * numberOfCastsSoFar;
+    double disToCenter = areaLight.radius * ((double) rand() / RAND_MAX);
     PointLight pointLight;
-    pointLight.position(disToCenter * cos((4 * M_PI / numberOfCasts) * numberOfCastsSoFar),
+    pointLight.position(disToCenter * cos(M_PI * 2 * ((double) rand() / RAND_MAX)),
                         0,
-                        disToCenter * sin((4 * M_PI / numberOfCasts) * numberOfCastsSoFar));
+                        disToCenter * sin(M_PI * 2 * ((double) rand() / RAND_MAX)));
     pointLight.position = pointLight.position + areaLight.position;
     pointLight.intensity = areaLight.intensity;
     //-find closest intersection/closest shape-//
