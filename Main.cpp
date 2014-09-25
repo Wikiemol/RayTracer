@@ -21,6 +21,7 @@ int main() {
     //- Scene light -//
     Scene::AreaLight areaLight;
     areaLight.position(1000, 1000, 1000);
+    areaLight.radius = 100;
     areaLight.intensity = 1;
 
     //- Materials -//

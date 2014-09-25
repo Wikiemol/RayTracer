@@ -45,7 +45,7 @@ Scene::Scene() {
     shapeBuffer = new Shape*[shapeBufferSize];
     numberOfShapes = 0;
     reflectionDepth = 3;
-    numberOfCasts = 102;
+    numberOfCasts = 50;
 }
 
 Scene::~Scene() {
@@ -84,7 +84,7 @@ Vector3 Scene::getColorAt(double x, double y) {
 
 //- returns a vector representing color -//
 Vector3 Scene::castRay(const Ray &mainRay, unsigned numberOfTimesRecursed, unsigned numberOfCastsSoFar) const {
-    double disToCenter = sqrt((areaLight.radius / numberOfCasts) * numberOfCastsSoFar);
+    double disToCenter = (areaLight.radius / numberOfCasts) * numberOfCastsSoFar;
     PointLight pointLight;
     pointLight.position(disToCenter * cos((4 * M_PI / numberOfCasts) * numberOfCastsSoFar),
                         0,
